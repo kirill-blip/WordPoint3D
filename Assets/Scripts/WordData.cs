@@ -4,5 +4,5 @@ using UnityEngine;
 public class WordData : ScriptableObject
 {
     public string Word;
-    public Material Picture;
+    public GameObject WordObject;
 }

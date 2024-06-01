@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 public class WordContainer : MonoBehaviour
@@ -12,6 +13,7 @@ public class WordContainer : MonoBehaviour
 
     [SerializeField] private Letter _letterPrefab;
     [SerializeField] private Transform _letterPosition;
+    [SerializeField] private Transform _wordObjectPosition;
 
     [SerializeField] private MeshRenderer _pictureMaterial;
     [SerializeField] private LayerMask _layerMask;
@@ -28,7 +30,7 @@ public class WordContainer : MonoBehaviour
         _appliedLetters.Clear();
 
         _wordData = wordData;
-        _pictureMaterial.material = _wordData.Picture;
+        Instantiate(_wordData.WordObject, _wordObjectPosition);
 
         for (int i = 0; i < _wordData.Word.Length; i++)
         {
@@ -56,13 +58,57 @@ public class WordContainer : MonoBehaviour
 
     public void ShuffleLetters(float letterDuration)
     {
-        foreach (var letter in _letters)
-        {
-            Vector3 position = GeneratePosition();
+        _appliedLetters.Clear();
 
-            letter.IsHandlerActive = true;
-            letter.Move(position, letterDuration);
+        List<Vector3> positions = GeneratePositions();
+
+        for (int i = 0; i < _letters.Count; i++)
+        {
+            _letters[i].IsHandlerActive = true;
+            _letters[i].Move(positions[i], letterDuration);
         }
+    }
+
+    private List<Vector3> GeneratePositions()
+    {
+        List<Vector3> result = new List<Vector3>();
+
+        for (int i = 0; i < _letters.Count; i++)
+        {
+            result.Add(GeneratePosition());
+        }
+
+        bool positionsChanged;
+
+        do
+        {
+            positionsChanged = false;
+
+            for (int i = 0; i < result.Count; i++)
+            {
+                Vector3 positionA = result[i];
+
+                for (int j = i + 1; j < result.Count; j++)
+                {
+                    Vector3 positionB = result[j];
+
+                    float distance = Vector3.Distance(positionA, positionB);
+
+                    if (distance < 1.25f)
+                    {
+                        Debug.Log("Positions " + positionA + " and " + positionB + " are within the distance threshold.");
+
+                        result[j] = GeneratePosition();
+
+                        Debug.Log("Position " + positionB + " was regenerated to " + result[j]);
+
+                        positionsChanged = true;
+                    }
+                }
+            }
+        } while (positionsChanged);
+
+        return result;
     }
 
     private Vector3 GeneratePosition()

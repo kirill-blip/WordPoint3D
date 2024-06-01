@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: Cheese
   m_EditorClassIdentifier: 
   Word: Cheese
-  Picture: {fileID: 2100000, guid: 1ca27327015ca9649a8cb68a238bda83, type: 2}
+  WordObject: {fileID: 5536727209381663088, guid: 21cd9bbab6638ce498a6c255f9525217,
+    type: 3}
