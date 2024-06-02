@@ -2,33 +2,22 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private Transform _spawnPosition;
-
-    [FormerlySerializedAs("_backgroundPrefab")] [SerializeField]
-    private GameObject _backgroundTilePrefab;
-
+    [SerializeField] private GameObject _backgroundTilePrefab;
     [SerializeField] private Transform _backgroundParent;
-    [SerializeField] private List<GameObject> _backgroundTiles;
 
-    [SerializeField] private Transform _wordContainerInitPosition;
-    [SerializeField] private Transform _defaultPosition;
+    [SerializeField] private GameObject _backgroundDefaultTile;
 
-    [SerializeField] private float _duration = 1;
+    [Space(10f)] [SerializeField] private Transform _wordContainerInitPosition;
+
+    [Space(10f)] [SerializeField] private float _duration = 1;
     [SerializeField] private float _letterDuration = 1;
 
-    [Space(10f)] [SerializeField] private Transform _firstPosition;
-    [SerializeField] private Transform _secondPosition;
-
-    [SerializeField] private List<Transform> _positions;
-
-    [SerializeField] private LetterPosition _letterPositionPrefab;
-    [SerializeField] private Transform _endPointParent;
-
-    [SerializeField] private AudioClip[] _correctSounds;
+    [Space(10f)] [SerializeField] private AudioClip[] _correctSounds;
     [SerializeField] private AudioClip _incorrectSound;
 
     private Player _player;
@@ -43,6 +32,7 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         _background = new Background(_spawnPosition.transform.position.z);
+        _background.Push(_backgroundDefaultTile);
     }
 
     private void Start()
@@ -65,6 +55,7 @@ public class GameManager : MonoBehaviour
         }
 
         GameObject tile = CreateTile();
+
         _background.Push(tile);
 
         // Получить слово (Word Container)
@@ -128,7 +119,7 @@ public class GameManager : MonoBehaviour
 
         // Нужно узнать, куда мы должны тащить букву.
         Vector3 targetLetterPosition = _wordManager.CurrentWordContainer.GetCurrentTargetPosition();
-        
+
         yield return _player.MoveWithEasingAsync(targetLetterPosition);
 
         _wordManager.CurrentWordContainer.ApplyLetter(letter);
@@ -150,14 +141,18 @@ public class GameManager : MonoBehaviour
                 {
                     _userInterface.HandleWordsOvered();
                 }
-                
-                // AudioSource.PlayClipAtPoint(_correctSounds[Random.Range(0, _correctSounds.Length)], Vector3.zero, 1f);
+
+                Vector3 to = new Vector3(0, 0, 8f);
+                _background.Move(to, _duration);
+                _player.MoveWithEasing(_player.transform.position - to, _duration);
+
+                AudioSource.PlayClipAtPoint(_correctSounds[Random.Range(0, _correctSounds.Length)], Vector3.zero, 1f);
             }
             else
             {
                 _userInterface.HandleWordAssembledIncorrect();
+                AudioSource.PlayClipAtPoint(_incorrectSound, Vector3.zero, 1f);
                 ReassembleWord();
-                // AudioSource.PlayClipAtPoint(_incorrectSound, Vector3.zero, 1f);
             }
         }
         else
@@ -169,17 +164,6 @@ public class GameManager : MonoBehaviour
         // {
         //     if (_wordFromLetters.ToLower().Trim() == _wordManager.GetCurrentWordData().Word.ToLower().Trim())
         //     {
-        //         if (_wordManager.GetCountWordData() == 0)
-        //         {
-        //             // WordsOvered?.Invoke();
-        //             _userInterface.HandleWordsOvered();
-        //             _player.gameObject.SetActive(false);
-        //
-        //             var letters = _wordManager.CurrentWordContainer.GetLetters();
-        //             letters.ForEach(x => Destroy(x.gameObject));
-        //             Destroy(_wordManager.CurrentWordContainer.gameObject);
-        //         }
-        //
         //         _letterPositions.ForEach(x => x.transform.SetParent(_wordManager.CurrentWordContainer.transform));
         //
         //         Vector3 movePosition = new Vector3(0, -8f, 0);
@@ -205,16 +189,6 @@ public class GameManager : MonoBehaviour
         //
         //         AudioSource.PlayClipAtPoint(_correctSounds[Random.Range(0, _correctSounds.Length)], Vector3.zero, 1f);
         //     }
-        //     else
-        //     {
-        //         // WordAssembledIncorrect?.Invoke();
-        //         _userInterface.HandleWordAssembledIncorrect();
-        //
-        //         AudioSource.PlayClipAtPoint(_incorrectSound, Vector3.zero, 1f);
-        //
-        //         ReassembleWord();
-        //     }
-        // }
     }
 
     private void ReassembleWord()

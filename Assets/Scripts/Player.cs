@@ -1,7 +1,5 @@
 ﻿using DG.Tweening;
-using System;
 using System.Collections;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -42,5 +40,10 @@ public class Player : MonoBehaviour
     public IEnumerator MoveAway()
     {
         return MoveWithEasingAsync(transform.position + new Vector3(0, 0, -1.25f));
+    }
+
+    public void MoveWithEasing(Vector3 to, float duration)
+    {
+        transform.DOMove(to, duration).SetEase(Ease.Linear);
     }
 }

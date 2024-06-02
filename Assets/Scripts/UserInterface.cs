@@ -17,19 +17,11 @@ public class UserInterface : MonoBehaviour
     [SerializeField] private Button _restartButton;
     [SerializeField] private Button _menuButton;
 
-    private GameManager _gameManager;
-
     public event UnityAction GoButtonPressed;
     public event UnityAction NextWordButtonPressed;
 
     private void Start()
     {
-        _gameManager = FindObjectOfType<GameManager>();
-
-        // _gameManager.WordAssembled += HandleWordAssembled;
-        // _gameManager.WordAssembledIncorrect += HandleWordAssembledIncorrect;
-        // _gameManager.WordsOvered += HandleWordsOvered;
-        
         _goButton.onClick.AddListener(() =>
         {
             GoButtonPressed?.Invoke();
