@@ -12,17 +12,21 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject _backgroundDefaultTile;
 
-    [Space(10f)] [SerializeField] private Transform _wordContainerInitPosition;
+    [Space(10f)]
+    [SerializeField] private Transform _wordContainerInitPosition;
 
-    [Space(10f)] [SerializeField] private float _duration = 1;
+    [Space(10f)]
+    [SerializeField] private float _duration = 1;
     [SerializeField] private float _letterDuration = 1;
 
-    [Space(10f)] [SerializeField] private AudioClip[] _correctSounds;
+    [Space(10f)]
+    [SerializeField] private AudioClip[] _correctSounds;
     [SerializeField] private AudioClip _incorrectSound;
 
     private Player _player;
     private UserInterface _userInterface;
     private WordManager _wordManager;
+    private LetterAudio _letterAudio;
 
     private Background _background;
 
@@ -42,16 +46,31 @@ public class GameManager : MonoBehaviour
         _player = FindObjectOfType<Player>();
         _wordManager = FindObjectOfType<WordManager>();
         _userInterface = FindObjectOfType<UserInterface>();
+        _letterAudio = FindObjectOfType<LetterAudio>();
 
+        _userInterface.NextWordButtonPressed += () => StartCoroutine(NextWordButtonPressedHandler());
         _userInterface.GoButtonPressed += GoButtonPressedHandler;
-        _userInterface.NextWordButtonPressed += NextWordButtonPressedHandler;
+        _userInterface.HelpButtonPressed += HelpButtonPressed;
     }
 
-    private void NextWordButtonPressedHandler()
+    private void HelpButtonPressed()
+    {
+        bool canPlayLetterAudio =
+            !string.IsNullOrEmpty(_wordManager.CurrentWordContainer.GetWord())
+            && _wordManager.CurrentWordContainer.IsShuffled();
+
+        if (canPlayLetterAudio)
+        {
+            _letterAudio.PlayAudioLetter(_wordManager.CurrentWordContainer.GetWord());
+        }
+
+    }
+
+    private IEnumerator NextWordButtonPressedHandler()
     {
         if (!_wordManager.HasNext())
         {
-            return;
+            yield break;
         }
 
         GameObject tile = CreateTile();
@@ -66,7 +85,9 @@ public class GameManager : MonoBehaviour
         wordContainer.SetParent(tile.transform);
 
         // Двинуть 
-        _background.Move(_duration);
+        yield return _background.Move(_duration);
+
+        _userInterface.ActivateGoButton();
     }
 
     private GameObject CreateTile()
@@ -159,36 +180,6 @@ public class GameManager : MonoBehaviour
         {
             HandlerLetterQueue();
         }
-
-        // if (_wordFromLetters.Length == _wordManager.GetCurrentWordData().Word.Length)
-        // {
-        //     if (_wordFromLetters.ToLower().Trim() == _wordManager.GetCurrentWordData().Word.ToLower().Trim())
-        //     {
-        //         _letterPositions.ForEach(x => x.transform.SetParent(_wordManager.CurrentWordContainer.transform));
-        //
-        //         Vector3 movePosition = new Vector3(0, -8f, 0);
-        //
-        //         List<Task> tasks = new()
-        //         {
-        //             _wordManager.CurrentWordContainer.transform
-        //                 .DOMove(_wordManager.CurrentWordContainer.transform.position + movePosition, _duration)
-        //                 .SetEase(Ease.Linear).AsyncWaitForCompletion(),
-        //             _player.MoveWithEasingAsync(_player.transform.position + movePosition, _duration)
-        //         };
-        //
-        //         foreach (GameObject item in _backgroundTiles)
-        //         {
-        //             tasks.Add(item.transform.DOMove(item.transform.position + movePosition, _duration)
-        //                 .SetEase(Ease.Linear).AsyncWaitForCompletion());
-        //         }
-        //
-        //         await Task.WhenAll(tasks);
-        //
-        //         // WordAssembled?.Invoke();
-        //         _userInterface.HandleWordAssembled();
-        //
-        //         AudioSource.PlayClipAtPoint(_correctSounds[Random.Range(0, _correctSounds.Length)], Vector3.zero, 1f);
-        //     }
     }
 
     private void ReassembleWord()

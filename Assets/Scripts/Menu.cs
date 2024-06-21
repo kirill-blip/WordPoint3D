@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 public class Menu : MonoBehaviour
 {
@@ -14,21 +15,32 @@ public class Menu : MonoBehaviour
     [Space(10f)]
     [SerializeField] private TextMeshProUGUI _versionText;
 
+    [Space(10f)]
+    [SerializeField] private AudioClip _clip;
+
     private void Start()
     {
-        _startButton.onClick.AddListener(StartGame);
-        _quitButton.onClick.AddListener(QuitGame);
+        _startButton.onClick.AddListener(() => StartCoroutine(StartButtonHandler()));
+        _quitButton.onClick.AddListener(() => StartCoroutine(QuitButtonHandler()));
 
         _versionText.text = Application.version;
     }
 
-    private void StartGame()
+    private IEnumerator StartButtonHandler()
     {
+        ButtonAudioClick.PlaySound(_clip);
+
+        yield return new WaitForSeconds(0.025f);
+
         SceneManager.LoadScene(1);
     }
 
-    private void QuitGame()
+    private IEnumerator QuitButtonHandler()
     {
+        ButtonAudioClick.PlaySound(_clip);
+
+        yield return new WaitForSeconds(0.025f);
+
 #if UNITY_EDITOR
         EditorApplication.ExitPlaymode();
 #else

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
@@ -16,18 +17,15 @@ public class Background
     public void Push(GameObject tile)
     {
         _tiles.Enqueue(tile);
-        Debug.Log(_tiles.Count);
 
         if (_tiles.Count > MaxQueueCount)
         {
-            Debug.Log(_tiles.Count);
-
             var tileToDestroy = _tiles.Dequeue();
             Object.Destroy(tileToDestroy);
         }
     }
 
-    public void Move(float duration)
+    public IEnumerator Move(float duration)
     {
         foreach (GameObject backgroundItem in _tiles)
         {
@@ -35,6 +33,8 @@ public class Background
                 0, 0, backgroundItem.transform.position.z - _spawnPositionZ);
             backgroundItem.transform.DOMove(endPosition, duration).SetEase(Ease.Linear);
         }
+
+        yield return new WaitForSeconds(duration);
     }
 
     public void Move(Vector3 to, float duration)

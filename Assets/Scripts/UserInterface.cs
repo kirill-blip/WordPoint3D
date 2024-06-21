@@ -14,36 +14,69 @@ public class UserInterface : MonoBehaviour
     [SerializeField] private Color _red;
 
     [SerializeField] private GameObject _endPanel;
+
     [SerializeField] private Button _restartButton;
     [SerializeField] private Button _menuButton;
+    [SerializeField] private Button _helpButton;
+
+    [SerializeField] private AudioClip _clip;
 
     public event UnityAction GoButtonPressed;
     public event UnityAction NextWordButtonPressed;
+    public event UnityAction HelpButtonPressed;
 
     private void Start()
     {
         _goButton.onClick.AddListener(() =>
         {
+            ButtonAudioClick.PlaySound(_clip);
+
             GoButtonPressed?.Invoke();
             _goButton.gameObject.SetActive(false);
         });
 
         _nextWordButton.onClick.AddListener(() =>
         {
+            ButtonAudioClick.PlaySound(_clip);
+
             NextWordButtonPressed?.Invoke();
-            _goButton.gameObject.SetActive(true);
             _nextWordButton.gameObject.SetActive(false);
+        });
+
+        _helpButton.onClick.AddListener(() =>
+        {
+            ButtonAudioClick.PlaySound(_clip);
+
+            HelpButtonPressed?.Invoke();
         });
 
         _restartButton.onClick.AddListener(() =>
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            StartCoroutine(RestartButtonHandler());
         });
 
         _menuButton.onClick.AddListener(() =>
         {
-            SceneManager.LoadScene(0);
+            StartCoroutine(MenuButtonHandler());
         });
+    }
+
+    private IEnumerator RestartButtonHandler()
+    {
+        ButtonAudioClick.PlaySound(_clip);
+
+        yield return new WaitForSeconds(.025f);
+        
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    private IEnumerator MenuButtonHandler()
+    {
+        ButtonAudioClick.PlaySound(_clip);
+
+        yield return new WaitForSeconds(.025f);
+
+        SceneManager.LoadScene(0);
     }
 
     public void HandleWordsOvered()
@@ -63,6 +96,11 @@ public class UserInterface : MonoBehaviour
         _nextWordButton.gameObject.SetActive(true);
 
         StartCoroutine(ActivatePanel(_green));
+    }
+
+    public void ActivateGoButton()
+    {
+        _goButton.gameObject.SetActive(true);
     }
 
     private IEnumerator ActivatePanel(Color color)

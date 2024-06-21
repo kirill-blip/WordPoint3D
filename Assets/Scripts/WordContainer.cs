@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 public class WordContainer : MonoBehaviour
@@ -18,11 +18,15 @@ public class WordContainer : MonoBehaviour
     [SerializeField] private MeshRenderer _pictureMaterial;
     [SerializeField] private LayerMask _layerMask;
 
-    private readonly List<Letter> _letters = new();
+    private List<Letter> _letters = new();
     private WordData _wordData;
 
     private List<Letter> _appliedLetters = new();
     private List<Vector3> _letterPositions = new();
+
+    private List<Letter> _testLetter = new();
+
+    private bool _isShuffled = false;
 
     public void SetData(WordData wordData, UnityEvent<Letter> letterClickHandler)
     {
@@ -42,6 +46,8 @@ public class WordContainer : MonoBehaviour
             letter.SetLetter(_wordData.Word[i]);
             letter.SetClickHandler(letterClickHandler);
 
+            letter.gameObject.name = wordData.Word[i].ToString();
+
             _letters.Add(letter);
         }
     }
@@ -58,22 +64,42 @@ public class WordContainer : MonoBehaviour
 
     public void ShuffleLetters(float letterDuration)
     {
-        _appliedLetters.Clear();
+        _isShuffled = true;
 
-        List<Vector3> positions = GeneratePositions();
+        List<Letter> lettersToMove = new List<Letter>();
 
-        for (int i = 0; i < _letters.Count; i++)
+        if (_appliedLetters.Count != 0)
         {
-            _letters[i].IsHandlerActive = true;
-            _letters[i].Move(positions[i], letterDuration);
+            for (int i = 0; i < _appliedLetters.Count; i++)
+            {
+                if (_appliedLetters[i].LetterValue != _letters[i].LetterValue)
+                {
+                    lettersToMove.Add(_appliedLetters[i]);
+                    _testLetter.Add(_appliedLetters[i]);
+
+                    _appliedLetters[i] = null;
+                }
+            }
+        }
+        else
+        {
+            lettersToMove = _letters;
+        }
+
+        List<Vector3> positions = GeneratePositions(lettersToMove);
+
+        for (int i = 0; i < lettersToMove.Count; i++)
+        {
+            lettersToMove[i].IsHandlerActive = true;
+            lettersToMove[i].Move(positions[i], letterDuration);
         }
     }
 
-    private List<Vector3> GeneratePositions()
+    private List<Vector3> GeneratePositions(List<Letter> letters)
     {
         List<Vector3> result = new List<Vector3>();
 
-        for (int i = 0; i < _letters.Count; i++)
+        for (int i = 0; i < letters.Count; i++)
         {
             result.Add(GeneratePosition());
         }
@@ -96,11 +122,11 @@ public class WordContainer : MonoBehaviour
 
                     if (distance < 1.25f)
                     {
-                        Debug.Log("Positions " + positionA + " and " + positionB + " are within the distance threshold.");
+                        //Debug.Log("Positions " + positionA + " and " + positionB + " are within the distance threshold.");
 
                         result[j] = GeneratePosition();
 
-                        Debug.Log("Position " + positionB + " was regenerated to " + result[j]);
+                        //Debug.Log("Position " + positionB + " was regenerated to " + result[j]);
 
                         positionsChanged = true;
                     }
@@ -123,18 +149,45 @@ public class WordContainer : MonoBehaviour
 
     public bool IsDone()
     {
-        return _letters.Count == _appliedLetters.Count;
+        if (!_appliedLetters.Any(x => x == null))
+        {
+            return _letters.Count == _appliedLetters.Count;
+        }
+
+        return false;
     }
 
     public void ApplyLetter(Letter letter)
     {
-        _appliedLetters.Add(letter);
+        if (_appliedLetters.Any(x => x == null))
+        {
+            for (int i = 0; i < _appliedLetters.Count; i++)
+            {
+                if (_appliedLetters[i] == null)
+                {
+                    _appliedLetters[i] = letter;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            _appliedLetters.Add(letter);
+        }
+
         letter.transform.SetParent(transform);
     }
 
     public Vector3 GetCurrentTargetPosition()
     {
-        return transform.TransformPoint(_letterPositions[_appliedLetters.Count]);
+        int index = _appliedLetters.Count;
+
+        if (_appliedLetters.Count != 0 && _appliedLetters.Any(x => x == null))
+        {
+            index = _appliedLetters.IndexOf(_appliedLetters.First(x => x == null));
+        }
+
+        return transform.TransformPoint(_letterPositions[index]);
     }
 
     public bool IsCorrect()
@@ -142,5 +195,15 @@ public class WordContainer : MonoBehaviour
         string userWord = string.Join("", _appliedLetters.Select(x => x.LetterValue).ToArray());
 
         return string.Equals(userWord, _wordData.Word, StringComparison.InvariantCultureIgnoreCase);
+    }
+
+    public string GetWord()
+    {
+        return _wordData.Word;
+    }
+
+    public bool IsShuffled()
+    {
+        return _isShuffled;
     }
 }
