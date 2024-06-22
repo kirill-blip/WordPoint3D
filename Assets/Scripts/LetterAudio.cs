@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class LetterAudio : MonoBehaviour
 {
-    private const string LETTERS_AUDIO_PATH = "Letters";
+    private const string LETTERS_AUDIO_PATH = "Audio/Letters";
 
     private AudioSource _audioSource;
     private List<AudioClip> _lettersClip;
@@ -16,14 +16,6 @@ public class LetterAudio : MonoBehaviour
     {
         _audioSource = GetComponent<AudioSource>();
         _lettersClip = Resources.LoadAll<AudioClip>(LETTERS_AUDIO_PATH).ToList();
-    }
-
-    public void PlayAudioLetter(string word)
-    {
-        if (!_isPlaying)
-        {
-            StartCoroutine(Play(word));
-        }
     }
 
     private IEnumerator Play(string word)
@@ -47,5 +39,18 @@ public class LetterAudio : MonoBehaviour
     private AudioClip GetAudioClip(char letter)
     {
         return _lettersClip.FirstOrDefault(clip => clip.name.ToLower() == letter.ToString().ToLower());
+    }
+
+    public void PlayAudioLetter(string word)
+    {
+        if (!_isPlaying)
+        {
+            StartCoroutine(Play(word));
+        }
+    }
+
+    public bool IsPlaying()
+    {
+        return _isPlaying;
     }
 }

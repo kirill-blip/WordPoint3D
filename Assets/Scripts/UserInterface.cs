@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class UserInterface : MonoBehaviour
 {
+    [SerializeField] private Button _playButton;
     [SerializeField] private Button _goButton;
     [SerializeField] private Button _nextWordButton;
 
@@ -21,12 +22,21 @@ public class UserInterface : MonoBehaviour
 
     [SerializeField] private AudioClip _clip;
 
-    public event UnityAction GoButtonPressed;
+    public event UnityAction PlayButtonPressed;
     public event UnityAction NextWordButtonPressed;
+    public event UnityAction GoButtonPressed;
     public event UnityAction HelpButtonPressed;
 
     private void Start()
     {
+        _playButton.onClick.AddListener(() =>
+        {
+            ButtonAudioClick.PlaySound(_clip);
+            
+            PlayButtonPressed?.Invoke();
+            _playButton.gameObject.SetActive(false);
+        });
+
         _goButton.onClick.AddListener(() =>
         {
             ButtonAudioClick.PlaySound(_clip);

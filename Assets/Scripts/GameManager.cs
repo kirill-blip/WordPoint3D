@@ -48,6 +48,7 @@ public class GameManager : MonoBehaviour
         _userInterface = FindObjectOfType<UserInterface>();
         _letterAudio = FindObjectOfType<LetterAudio>();
 
+        _userInterface.PlayButtonPressed += () => StartCoroutine(NextWordButtonPressedHandler());
         _userInterface.NextWordButtonPressed += () => StartCoroutine(NextWordButtonPressedHandler());
         _userInterface.GoButtonPressed += GoButtonPressedHandler;
         _userInterface.HelpButtonPressed += HelpButtonPressed;
@@ -63,7 +64,6 @@ public class GameManager : MonoBehaviour
         {
             _letterAudio.PlayAudioLetter(_wordManager.CurrentWordContainer.GetWord());
         }
-
     }
 
     private IEnumerator NextWordButtonPressedHandler()
@@ -87,6 +87,7 @@ public class GameManager : MonoBehaviour
         // Двинуть 
         yield return _background.Move(_duration);
 
+        WordAudio.PlayWordAudio(_wordManager.CurrentWordContainer.GetWord());
         _userInterface.ActivateGoButton();
     }
 

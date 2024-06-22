@@ -1,7 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using Random = UnityEngine.Random;
@@ -11,22 +12,50 @@ public class WordContainer : MonoBehaviour
     [SerializeField] private Vector2 _leftTopBound;
     [SerializeField] private Vector2 _rightBottomBound;
 
+    [Space(10f)]
     [SerializeField] private Letter _letterPrefab;
     [SerializeField] private Transform _letterPosition;
     [SerializeField] private Transform _wordObjectPosition;
 
-    [SerializeField] private MeshRenderer _pictureMaterial;
+    [Space(10f)]
     [SerializeField] private LayerMask _layerMask;
 
+    [SerializeField] private TextMeshProUGUI _text;
+
     private List<Letter> _letters = new();
+    private WordObject _wordObject;
     private WordData _wordData;
 
     private List<Letter> _appliedLetters = new();
     private List<Vector3> _letterPositions = new();
 
-    private List<Letter> _testLetter = new();
+    private LetterAudio _letterAudio;
 
     private bool _isShuffled = false;
+
+    private void ObjectClickedHandler()
+    {
+        _letterAudio ??= FindObjectOfType<LetterAudio>();
+
+        if (!IsDone() && _isShuffled)
+        {
+            _text.text = GetWord();
+
+            WordAudio.PlayWordAudio(GetWord());
+            StartCoroutine(PlayLetterAudio());
+        }
+    }
+
+    private IEnumerator PlayLetterAudio()
+    {
+        yield return new WaitForSeconds(.5f);
+
+        _letterAudio.PlayAudioLetter(GetWord());
+
+        yield return new WaitUntil(() => !_letterAudio.IsPlaying());
+
+        _text.text = string.Empty;
+    }
 
     public void SetData(WordData wordData, UnityEvent<Letter> letterClickHandler)
     {
@@ -35,6 +64,9 @@ public class WordContainer : MonoBehaviour
 
         _wordData = wordData;
         Instantiate(_wordData.WordObject, _wordObjectPosition);
+
+        _wordObject = GetComponentInChildren<WordObject>();
+        _wordObject.ObjectClicked += ObjectClickedHandler;
 
         for (int i = 0; i < _wordData.Word.Length; i++)
         {
@@ -75,7 +107,6 @@ public class WordContainer : MonoBehaviour
                 if (_appliedLetters[i].LetterValue != _letters[i].LetterValue)
                 {
                     lettersToMove.Add(_appliedLetters[i]);
-                    _testLetter.Add(_appliedLetters[i]);
 
                     _appliedLetters[i] = null;
                 }
