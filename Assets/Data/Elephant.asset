@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4675b7488107324c8a4da21dee60450, type: 3}
   m_Name: Elephant
   m_EditorClassIdentifier: 
-  Word: Elephant
+  Word: elephant
   WordObject: {fileID: 0}

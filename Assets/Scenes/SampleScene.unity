@@ -1257,6 +1257,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 0ce7028f16ec0fc418616f5217bab4a4, type: 3}
   - {fileID: 8300000, guid: 00bbe6b29ba7a8e4881838813f8bc019, type: 3}
   _incorrectSound: {fileID: 8300000, guid: 708cd7a89b4dc214abe3b5fe3919671d, type: 3}
+  _firstTimeShuffledWord: 0
 --- !u!4 &615394615
 Transform:
   m_ObjectHideFlags: 0

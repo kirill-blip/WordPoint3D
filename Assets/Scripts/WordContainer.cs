@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using Random = UnityEngine.Random;
@@ -20,7 +19,8 @@ public class WordContainer : MonoBehaviour
     [Space(10f)]
     [SerializeField] private LayerMask _layerMask;
 
-    [SerializeField] private TextMeshProUGUI _text;
+    [SerializeField] private GameObject _hintClickMeCanvas;
+    private HintOfWordTextUI _hintOfWordTextUI;
 
     private List<Letter> _letters = new();
     private WordObject _wordObject;
@@ -36,10 +36,11 @@ public class WordContainer : MonoBehaviour
     private void ObjectClickedHandler()
     {
         _letterAudio ??= FindObjectOfType<LetterAudio>();
+        _hintOfWordTextUI ??= GetComponentInChildren<HintOfWordTextUI>();
 
         if (!IsDone() && _isShuffled)
         {
-            _text.text = GetWord();
+            _hintOfWordTextUI.SetWord(GetWord());
 
             WordAudio.PlayWordAudio(GetWord());
             StartCoroutine(PlayLetterAudio());
@@ -48,13 +49,38 @@ public class WordContainer : MonoBehaviour
 
     private IEnumerator PlayLetterAudio()
     {
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSeconds(1f);
 
-        _letterAudio.PlayAudioLetter(GetWord());
+        List<Letter> notJumpedLetters = new List<Letter>(_letters);
+        List<Letter> jumpedLetters = new List<Letter>();
 
-        yield return new WaitUntil(() => !_letterAudio.IsPlaying());
+        for (int i = 0; i < notJumpedLetters.Count; i++)
+        {
+            Letter letter = notJumpedLetters[i];
 
-        _text.text = string.Empty;
+            if (_appliedLetters.Count != 0
+                && !(i < 0 || i >= _appliedLetters.Count)
+                && _appliedLetters[i] != null
+                && _appliedLetters[i].LetterValue == letter.LetterValue)
+            {
+                letter = _appliedLetters[i];
+
+                notJumpedLetters.SwapElements(i, notJumpedLetters.IndexOf(_appliedLetters[i]));
+            }
+
+            if (!jumpedLetters.Contains(letter))
+            {
+                letter.Jump();
+                _letterAudio.PlayAudioLetter(letter.LetterValue);
+
+                jumpedLetters.Add(letter);
+
+                yield return new WaitForSeconds(1f);
+            }
+        }
+
+
+        _hintOfWordTextUI.SetWord(string.Empty);
     }
 
     public void SetData(WordData wordData, UnityEvent<Letter> letterClickHandler)
@@ -236,5 +262,40 @@ public class WordContainer : MonoBehaviour
     public bool IsShuffled()
     {
         return _isShuffled;
+    }
+
+    public void ShowHintUI()
+    {
+        StartCoroutine(ShowHintUICoroutine());
+    }
+
+    public void ChangeRandomlyTwoLettersPosition()
+    {
+        int count = Random.Range(2, 3);
+
+        List<Letter> letters = new List<Letter>(_letters);
+
+        for (int i = 0; i < count; i++)
+        {
+            Letter letterToMove = letters[Random.Range(0, letters.Count)];
+
+            letters.Remove(letterToMove);
+
+            float x = letterToMove.transform.localPosition.x;
+            float y = letterToMove.transform.localPosition.y + Random.Range(0.1f, 0.2f);
+            float z = letterToMove.transform.localPosition.z + Random.Range(0.1f, 0.2f);
+
+            Vector3 exactPosition = new Vector3(x, y, z);
+
+            letterToMove.Move(exactPosition, .25f);
+        }
+    }
+    private IEnumerator ShowHintUICoroutine()
+    {
+        _hintClickMeCanvas.SetActive(true);
+
+        yield return new WaitForSeconds(2f);
+
+        _hintClickMeCanvas.SetActive(false);
     }
 }

@@ -1,28 +1,29 @@
 ﻿using DG.Tweening;
 using System;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class Letter : MonoBehaviour
 {
+    [SerializeField] private float _jumpForce = 10f;
+    [SerializeField] private float _duration = .5f;
     [SerializeField] private TextMeshPro[] _texts;
 
     private Collider _collider;
+    private Rigidbody _rigidbody;
     private bool _isMoving;
 
     public char LetterValue { get; private set; }
-
-    private UnityEvent<Letter> _clickHandler;
-
     public bool IsHandlerActive { get; set; }
-
     public Vector3 InitialContainerPosition { get; private set; }
+    
+    private UnityEvent<Letter> _clickHandler;
 
     private void Awake()
     {
         _collider = GetComponent<Collider>();
+        _rigidbody = GetComponent<Rigidbody>();
         InitialContainerPosition = transform.position;
     }
 
@@ -58,5 +59,10 @@ public class Letter : MonoBehaviour
     {
         _collider.isTrigger = false;
         transform.DOLocalMove(position, duration).SetEase(Ease.Linear);
+    }
+
+    public void Jump()
+    {
+        transform.DOJump(transform.position, _jumpForce, 1, _duration);
     }
 }

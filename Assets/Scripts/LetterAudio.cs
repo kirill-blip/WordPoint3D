@@ -18,20 +18,17 @@ public class LetterAudio : MonoBehaviour
         _lettersClip = Resources.LoadAll<AudioClip>(LETTERS_AUDIO_PATH).ToList();
     }
 
-    private IEnumerator Play(string word)
+    private IEnumerator Play(char letter)
     {
         _isPlaying = true;
 
-        foreach (char letter in word)
-        {
-            AudioClip clip = GetAudioClip(letter);
+        AudioClip clip = GetAudioClip(letter);
 
-            _audioSource.clip = clip;
-            _audioSource.Play();
+        _audioSource.clip = clip;
+        _audioSource.Play();
 
-            yield return new WaitWhile(() => _audioSource.isPlaying);
-            yield return new WaitForSeconds(.1f);
-        }
+        yield return new WaitWhile(() => _audioSource.isPlaying);
+        yield return new WaitForSeconds(.1f);
 
         _isPlaying = false;
     }
@@ -41,11 +38,11 @@ public class LetterAudio : MonoBehaviour
         return _lettersClip.FirstOrDefault(clip => clip.name.ToLower() == letter.ToString().ToLower());
     }
 
-    public void PlayAudioLetter(string word)
+    public void PlayAudioLetter(char letter)
     {
         if (!_isPlaying)
         {
-            StartCoroutine(Play(word));
+            StartCoroutine(Play(letter));
         }
     }
 

@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4675b7488107324c8a4da21dee60450, type: 3}
   m_Name: Tomato
   m_EditorClassIdentifier: 
-  Word: Tomato
+  Word: tomato
   WordObject: {fileID: 1686375458784282183, guid: 99fccec48e1f1f947aad3b2e54bdf2f2,
     type: 3}

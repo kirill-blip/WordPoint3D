@@ -23,15 +23,20 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioClip[] _correctSounds;
     [SerializeField] private AudioClip _incorrectSound;
 
+    [SerializeField] private bool _firstTimeShuffledWord = false;
+
     private Player _player;
     private UserInterface _userInterface;
     private WordManager _wordManager;
+    private HintManager _hintManager;
     private LetterAudio _letterAudio;
 
     private Background _background;
 
     private Queue<Letter> _letterQueue;
     private bool _isLetterHandling;
+
+    private const string FIRST_TIME_SHUFFLED_WORD = "FirstTimeShuffledWord";
 
     private void Awake()
     {
@@ -62,7 +67,7 @@ public class GameManager : MonoBehaviour
 
         if (canPlayLetterAudio)
         {
-            _letterAudio.PlayAudioLetter(_wordManager.CurrentWordContainer.GetWord());
+            //_letterAudio.PlayAudioLetter(_wordManager.CurrentWordContainer.GetWord());
         }
     }
 
@@ -88,6 +93,7 @@ public class GameManager : MonoBehaviour
         yield return _background.Move(_duration);
 
         WordAudio.PlayWordAudio(_wordManager.CurrentWordContainer.GetWord());
+        _wordManager.CurrentWordContainer.ChangeRandomlyTwoLettersPosition();
         _userInterface.ActivateGoButton();
     }
 
@@ -105,6 +111,19 @@ public class GameManager : MonoBehaviour
     private void DisassembleWord()
     {
         _wordManager.CurrentWordContainer.ShuffleLetters(_letterDuration);
+
+#if !UNITY_EDITOR
+        if (PlayerPrefs.HasKey(FIRST_TIME_SHUFFLED_WORD))
+        {
+            _firstTimeShuffledWord = Convert.ToBoolean(PlayerPrefs.GetInt(FIRST_TIME_SHUFFLED_WORD));
+        }
+#endif
+
+        if (!_firstTimeShuffledWord)
+        {
+            _wordManager.CurrentWordContainer.ShowHintUI();
+            _firstTimeShuffledWord = true;
+        }
     }
 
     public void LetterClickedHandler(Letter letter)

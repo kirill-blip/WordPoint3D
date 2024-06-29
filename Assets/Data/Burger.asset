@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4675b7488107324c8a4da21dee60450, type: 3}
   m_Name: Burger
   m_EditorClassIdentifier: 
-  Word: Burger
+  Word: burger
   WordObject: {fileID: 8129290058374401139, guid: cb2f814284e3da84da46e3faf93e6c62,
     type: 3}

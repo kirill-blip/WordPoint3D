@@ -25,4 +25,11 @@ public static class ExtensionMethods
             list[n] = value;
         }
     }
+
+    public static void SwapElements<T>(this List<T> list, int index1, int index2)
+    {
+        T temp = list[index1];
+        list[index1] = list[index2];
+        list[index2] = temp;
+    }
 }
