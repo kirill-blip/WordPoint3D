@@ -23,7 +23,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioClip[] _correctSounds;
     [SerializeField] private AudioClip _incorrectSound;
 
+    [Space(10f)]
     [SerializeField] private bool _firstTimeShuffledWord = false;
+    [SerializeField] private float _secondsToDisassambleWord = 10f;
 
     private Player _player;
     private UserInterface _userInterface;
@@ -94,7 +96,16 @@ public class GameManager : MonoBehaviour
 
         WordAudio.PlayWordAudio(_wordManager.CurrentWordContainer.GetWord());
         _wordManager.CurrentWordContainer.ChangeRandomlyTwoLettersPosition();
-        _userInterface.ActivateGoButton();
+
+        _wordManager.CurrentWordContainer.ChangeLettersColorToTransparent();
+
+        yield return new WaitForSeconds(.25f);
+
+        _wordManager.CurrentWordContainer.ChangeLettersColorToDefault();
+
+        yield return new WaitForSeconds(_secondsToDisassambleWord);
+
+        DisassembleWord();
     }
 
     private GameObject CreateTile()

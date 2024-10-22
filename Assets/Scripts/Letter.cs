@@ -1,18 +1,26 @@
 ﻿using DG.Tweening;
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class Letter : MonoBehaviour
 {
+    [SerializeField] private Color _targetColor;
+    [SerializeField] private float _emissiveIntensity = 5f;
+
+    [Space(10f)]
     [SerializeField] private float _jumpForce = 10f;
     [SerializeField] private float _duration = .5f;
     [SerializeField] private TextMeshPro[] _texts;
 
     private Collider _collider;
     private Rigidbody _rigidbody;
+    private Renderer _renderer;
+
     private bool _isMoving;
+    private Color _initialColor;
 
     public char LetterValue { get; private set; }
     public bool IsHandlerActive { get; set; }
@@ -24,6 +32,10 @@ public class Letter : MonoBehaviour
     {
         _collider = GetComponent<Collider>();
         _rigidbody = GetComponent<Rigidbody>();
+        _renderer = GetComponent<Renderer>();
+
+        _initialColor = _renderer.material.color;
+
         InitialContainerPosition = transform.position;
     }
 
@@ -64,5 +76,39 @@ public class Letter : MonoBehaviour
     public void Jump()
     {
         transform.DOJump(transform.position, _jumpForce, 1, _duration);
+    }
+
+    public IEnumerator ChangeLettersColorTo(Color color)
+    {
+        float elapsedTime = 0.0f;
+        float duration = 2f;
+
+        Color from = _renderer.material.color;
+        Color to = color;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+
+            float time = elapsedTime / duration;
+
+            Color newColor = Color.Lerp(from, to, time);
+
+            _renderer.material.color = newColor;
+
+            yield return null;
+        }
+
+        _renderer.material.color = to;
+    }
+
+    public void ChangeLettersColorToDefault()
+    {
+        StartCoroutine(ChangeLettersColorTo(_initialColor));
+    }
+
+    public void ChangeLettersColorToTransparent()
+    {
+        StartCoroutine(ChangeLettersColorTo(_targetColor));
     }
 }

@@ -290,6 +290,7 @@ public class WordContainer : MonoBehaviour
             letterToMove.Move(exactPosition, .25f);
         }
     }
+
     private IEnumerator ShowHintUICoroutine()
     {
         _hintClickMeCanvas.SetActive(true);
@@ -297,5 +298,21 @@ public class WordContainer : MonoBehaviour
         yield return new WaitForSeconds(2f);
 
         _hintClickMeCanvas.SetActive(false);
+    }
+
+    public void ChangeLettersColorToTransparent()
+    {
+        foreach (var item in _letters)
+        {
+            item.ChangeLettersColorToTransparent();
+        }
+    }
+
+    public void ChangeLettersColorToDefault()
+    {
+        foreach (var item in _letters)
+        {
+            item.ChangeLettersColorToDefault();
+        }
     }
 }
